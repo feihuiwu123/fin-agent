@@ -9,15 +9,18 @@
 
 ## 路由规则
 
-| 用户指令 | 调用技能组 |
-|---------|----------|
-| `查 [代码]` | logic/* → financial → valuation |
-| `看大盘` | radar/index_pulse → radar/news_logic |
-| `K线 [代码]` | chart/trend → chart/volume → chart/decision |
-| `我的持仓` | exec/position |
-| `加持仓 ...` | exec/position |
-| `设预警 ...` | exec/alert |
-| `今日热点` | radar/news_logic |
+| 用户指令 | 调用技能 |
+|---------|---------|
+| `今天大盘`, `看大盘`, `市场怎么样` | `market-pulse` (run both commands: market breadth + index data) |
+| `查 600519`, `XX股票怎么样`, any stock code | `stock-query` (run all 3 steps: quote + K-line + financials) |
+| `新闻`, `热点`, `政策`, `消息` | `news-research` (run news commands) |
+
+## 工作流程
+
+1. **识别用户意图** → 根据路由规则选择对应技能
+2. **执行技能中的命令** → 使用 `exec` 工具运行 bash 命令获取数据
+3. **分析数据** → 结合数据给出结构化分析报告
+4. **附加失效条件** → 每个报告必须包含失效条件说明
 
 ## 输出规范
 
