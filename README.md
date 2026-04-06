@@ -304,8 +304,20 @@ finagent/
 ├── README_EN.md                 # English version
 ├── LICENSE                      # MIT License
 ├── pyproject.toml               # Python 项目配置
-├── CONTRIBUTING.md              # 贡献指南
-├── SOUL.md                      # Nanobot 人格定义
+│
+├── docs/                        # 文档
+│   ├── AGENTS.md                # Agent 开发指令
+│   ├── CONTRIBUTING.md          # 贡献指南（中文）
+│   ├── CONTRIBUTING_EN.md       # Contributing guide (English)
+│   ├── SOUL.md                  # Nanobot 人格定义（中文）
+│   └── SOUL_EN.md               # Agent personality (English)
+│
+├── scripts/                     # 脚本
+│   └── deploy.sh                # 一键部署脚本
+│
+├── config/                      # 配置示例
+│   ├── config.example.json
+│   └── cron.example.json
 │
 ├── finagent/                    # 主代码
 │   ├── __init__.py

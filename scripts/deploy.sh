@@ -125,7 +125,7 @@ rm -rf "$HOME/.nanobot/workspace/skills"
 rm -f "$HOME/.nanobot/workspace/SOUL.md"
 mkdir -p "$HOME/.nanobot/workspace"
 cp -r "$DEPLOY_DIR/finagent/skills/" "$HOME/.nanobot/workspace/skills/"
-cp "$DEPLOY_DIR/SOUL.md" "$HOME/.nanobot/workspace/SOUL.md"
+cp "$DEPLOY_DIR/docs/SOUL.md" "$HOME/.nanobot/workspace/SOUL.md"
 info "Skills 已链接"
 
 # ==================== 7. 配置 systemd 服务 ====================

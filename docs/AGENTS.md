@@ -69,7 +69,7 @@ All skills currently raise `NotImplementedError`.
 
 ```bash
 cp -r finagent/skills/ ~/.nanobot/workspace/skills/
-cp finagent/SOUL.md ~/.nanobot/workspace/SOUL.md
+cp docs/SOUL.md ~/.nanobot/workspace/SOUL.md
 ```
 
 ## Running

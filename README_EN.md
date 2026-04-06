@@ -304,8 +304,20 @@ finagent/
 ├── README_EN.md                 # This file (English)
 ├── LICENSE                      # MIT License
 ├── pyproject.toml               # Python project config
-├── CONTRIBUTING.md              # Contributing guide
-├── SOUL.md                      # Agent personality definition
+│
+├── docs/                        # Documentation
+│   ├── AGENTS.md                # Agent development instructions
+│   ├── CONTRIBUTING.md          # Contributing guide (Chinese)
+│   ├── CONTRIBUTING_EN.md       # Contributing guide (English)
+│   ├── SOUL.md                  # Agent personality (Chinese)
+│   └── SOUL_EN.md               # Agent personality (English)
+│
+├── scripts/                     # Scripts
+│   └── deploy.sh                # One-click deploy script
+│
+├── config/                      # Config examples
+│   ├── config.example.json
+│   └── cron.example.json
 │
 ├── finagent/                    # Main source code
 │   ├── __init__.py
