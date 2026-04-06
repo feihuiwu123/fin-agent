@@ -96,9 +96,9 @@ else
     warn ".env 文件不存在，将使用环境变量或默认值"
 fi
 
-# 检查是否 root（提示但不阻止）
+# 安全检查：禁止 root 运行
 if [ "$(id -u)" -eq 0 ]; then
-    warn "当前以 root 用户运行，建议使用普通用户部署"
+    error "禁止使用 root 运行此脚本！请创建普通用户后部署\n  示例: useradd -m finagent && su - finagent"
 fi
 
 # 检查系统
