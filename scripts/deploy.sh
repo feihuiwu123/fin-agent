@@ -1,11 +1,11 @@
 #!/bin/bash
-# FinAgent 一键部署脚本 | FinAgent One-Click Deploy Script
-# 用法: bash deploy.sh
-# 系统要求: Ubuntu 22.04+ / Debian 12+
+# FinAgent One-Click Deploy Script
+# Usage: bash deploy.sh
+# Requirements: Ubuntu 22.04+ / Debian 12+
 
 set -euo pipefail
 
-# ==================== 颜色输出 ====================
+# ==================== Color Output ====================
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -15,14 +15,14 @@ info()  { echo -e "${GREEN}[INFO]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
-# ==================== 配置区（从 .env 读取） ====================
-# LLM 提供商: deepseek / opencode / minimax / qwen / openrouter
+# ==================== Configuration (read from .env) ====================
+# LLM Provider: deepseek / opencode / minimax / qwen / openrouter
 LLM_PROVIDER="${LLM_PROVIDER:-deepseek}"
 LLM_API_KEY="${LLM_API_KEY:-}"
 LLM_API_BASE="${LLM_API_BASE:-}"
 LLM_MODEL="${LLM_MODEL:-}"
 
-# 根据提供商自动设置默认值
+# Auto-set defaults based on provider
 if [ -z "$LLM_API_BASE" ]; then
     case "$LLM_PROVIDER" in
         deepseek)   LLM_API_BASE="https://api.deepseek.com/v1" ;;
@@ -44,7 +44,7 @@ if [ -z "$LLM_MODEL" ]; then
     esac
 fi
 
-# 渠道配置（可选，留空则不启用）
+# Channel configuration (optional, leave empty to disable)
 FEISHU_ENABLED="${FEISHU_ENABLED:-false}"
 FEISHU_APP_ID="${FEISHU_APP_ID:-}"
 FEISHU_APP_SECRET="${FEISHU_APP_SECRET:-}"
@@ -73,7 +73,7 @@ SLACK_ENABLED="${SLACK_ENABLED:-false}"
 SLACK_BOT_TOKEN="${SLACK_BOT_TOKEN:-}"
 SLACK_APP_TOKEN="${SLACK_APP_TOKEN:-}"
 
-# 部署路径（优先使用当前目录，如果已有 .env 或 .git）
+# Deploy path (prefer current directory if .env or .git exists)
 if [ -f ".env" ] || [ -d ".git" ]; then
     DEPLOY_DIR="$(pwd)"
 else
@@ -81,55 +81,55 @@ else
 fi
 VENV_DIR="${DEPLOY_DIR}/.venv"
 
-# ==================== 前置检查 ====================
-info "=== FinAgent 部署脚本 ==="
-info "部署目录: $DEPLOY_DIR"
+# ==================== Pre-checks ====================
+info "=== FinAgent Deploy Script ==="
+info "Deploy directory: $DEPLOY_DIR"
 
-# 加载 .env 环境变量
+# Load .env variables
 if [ -f "$DEPLOY_DIR/.env" ]; then
-    info "加载 .env 环境变量..."
+    info "Loading .env variables..."
     set -a
     source "$DEPLOY_DIR/.env"
     set +a
 elif [ -f ".env" ]; then
-    info "加载 .env 环境变量..."
+    info "Loading .env variables..."
     set -a
     source ".env"
     set +a
 else
-    warn ".env 文件不存在，将使用环境变量或默认值"
+    warn ".env file not found, using environment variables or defaults"
 fi
 
-# 安全检查：禁止 root 运行
+# Security check: prohibit root execution
 if [ "$(id -u)" -eq 0 ]; then
-    error "禁止使用 root 运行此脚本！请创建普通用户后部署\n  示例: useradd -m finagent && su - finagent"
+    error "Running as root is not allowed! Please create a regular user to deploy\n  Example: useradd -m finagent && su - finagent"
 fi
 
-# 检查 sudo 前置条件（不触发密码提示）
+# Check sudo prerequisites (without triggering password prompt)
 CURRENT_USER="$(whoami)"
 if ! id -nG | grep -qw sudo; then
-    error "当前用户 '$CURRENT_USER' 不在 sudo 组！
+    error "User '$CURRENT_USER' is not in the sudo group!
 
-请切换到 root 用户后执行以下修复步骤：
+Please switch to root and run the following to fix:
   su -
-  # 1. 将用户加入 sudo 组
+  # 1. Add user to sudo group
   usermod -aG sudo $CURRENT_USER
-  # 2. 为用户设置密码（部署时需要 sudo 密码）
+  # 2. Set a password for the user (required for sudo during deploy)
   passwd $CURRENT_USER
-  # 3. 切回用户重新部署
+  # 3. Switch back to user and redeploy
   su - $CURRENT_USER
   bash scripts/deploy.sh"
 fi
 
-# 检查系统
+# Check system
 if ! command -v apt &>/dev/null; then
-    warn "非 Debian/Ubuntu 系统，可能需要手动安装依赖"
+    warn "Not a Debian/Ubuntu system, you may need to install dependencies manually"
 fi
 
-# ==================== 1. 安装系统依赖 ====================
-info "[1/7] 安装系统依赖..."
+# ==================== 1. Install System Dependencies ====================
+info "[1/7] Installing system dependencies..."
 
-# 优先检测系统已有 Python 3.11+
+# Prefer detecting existing Python 3.11+
 PYTHON=""
 for ver in python3.13 python3.12 python3.11; do
     if command -v $ver &>/dev/null; then
@@ -141,64 +141,64 @@ done
 if [ -z "$PYTHON" ]; then
     sudo apt update -qq
     for ver in 13 12 11; do
-        info "尝试安装 python3.${ver}..."
+        info "Attempting to install python3.${ver}..."
         sudo apt install -y python3.${ver} python3.${ver}-venv python3-pip git curl 2>/dev/null && {
             PYTHON="python3.${ver}"
             break
         }
     done
     if [ -z "$PYTHON" ]; then
-        error "Python 3.11+ 安装失败，请手动安装"
+        error "Python 3.11+ installation failed, please install manually"
     fi
 fi
 
-info "Python 版本: $($PYTHON --version)"
+info "Python version: $($PYTHON --version)"
 
-# ==================== 2. 克隆/更新代码 ====================
-info "[2/7] 准备代码..."
+# ==================== 2. Clone/Update Code ====================
+info "[2/7] Preparing code..."
 if [ -d "$DEPLOY_DIR/.git" ]; then
     cd "$DEPLOY_DIR"
     git pull
-    info "代码已更新"
+    info "Code is up to date"
 else
     mkdir -p "$(dirname "$DEPLOY_DIR")"
-    # 如果有 git 仓库，取消下面这行的注释并修改 URL
+    # If you have a git repo, uncomment and update the URL below
     # git clone https://github.com/yourname/finagent.git "$DEPLOY_DIR"
-    info "请将代码复制到 $DEPLOY_DIR，或修改脚本中的 git clone 地址"
+    info "Please copy code to $DEPLOY_DIR, or update the git clone URL in this script"
 fi
 cd "$DEPLOY_DIR"
 
-# ==================== 3. 创建虚拟环境 ====================
-info "[3/7] 创建 Python 虚拟环境..."
+# ==================== 3. Create Virtual Environment ====================
+info "[3/7] Creating Python virtual environment..."
 $PYTHON -m venv "$VENV_DIR"
 source "$VENV_DIR/bin/activate"
 pip install --upgrade pip -q
 
-# ==================== 4. 安装 Python 依赖 ====================
-info "[4/7] 安装 Python 依赖..."
+# ==================== 4. Install Python Dependencies ====================
+info "[4/7] Installing Python dependencies..."
 pip install -e ".[dev]" -q
 pip install nanobot-ai -q
-info "依赖安装完成"
+info "Dependencies installed"
 
-# ==================== 5. 初始化 Nanobot 配置 ====================
-info "[5/7] 初始化 Nanobot 配置..."
+# ==================== 5. Initialize Nanobot Configuration ====================
+info "[5/7] Initializing Nanobot configuration..."
 NANOBOT_CONFIG="$HOME/.nanobot/config.json"
 mkdir -p "$HOME/.nanobot"
 
-# 构建 channels JSON
+# Build channels JSON
 CHANNELS_JSON="{"
 
-# 飞书
+# Feishu
 CHANNELS_JSON+="\"feishu\": {\"enabled\": ${FEISHU_ENABLED}"
 if [ -n "$FEISHU_APP_ID" ]; then
     CHANNELS_JSON+=", \"appId\": \"${FEISHU_APP_ID}\", \"appSecret\": \"${FEISHU_APP_SECRET}\""
 fi
 CHANNELS_JSON+="}"
 
-# 微信
+# WeChat
 CHANNELS_JSON+=", \"weixin\": {\"enabled\": ${WECHAT_ENABLED}}"
 
-# 钉钉
+# DingTalk
 CHANNELS_JSON+=", \"dingtalk\": {\"enabled\": ${DINGTALK_ENABLED}"
 if [ -n "$DINGTALK_APP_KEY" ]; then
     CHANNELS_JSON+=", \"appKey\": \"${DINGTALK_APP_KEY}\", \"appSecret\": \"${DINGTALK_APP_SECRET}\""
@@ -271,19 +271,19 @@ cat > "$NANOBOT_CONFIG" << EOF
   }
 }
 EOF
-info "Nanobot 配置已写入: $NANOBOT_CONFIG"
+info "Nanobot config written to: $NANOBOT_CONFIG"
 
-# ==================== 6. 链接 Skills ====================
-info "[6/7] 链接 Skills 到 Nanobot..."
+# ==================== 6. Link Skills ====================
+info "[6/7] Linking Skills to Nanobot..."
 rm -rf "$HOME/.nanobot/workspace/skills"
 rm -f "$HOME/.nanobot/workspace/SOUL.md"
 mkdir -p "$HOME/.nanobot/workspace"
 cp -r "$DEPLOY_DIR/finagent/skills/" "$HOME/.nanobot/workspace/skills/"
 cp "$DEPLOY_DIR/docs/SOUL.md" "$HOME/.nanobot/workspace/SOUL.md"
-info "Skills 已链接"
+info "Skills linked"
 
-# ==================== 7. 配置 systemd 服务 ====================
-info "[7/7] 配置 systemd 服务..."
+# ==================== 7. Configure systemd Service ====================
+info "[7/7] Configuring systemd service..."
 SERVICE_FILE="/etc/systemd/system/finagent.service"
 
 sudo tee "$SERVICE_FILE" > /dev/null << EOF
@@ -301,7 +301,7 @@ RestartSec=10
 Environment=PATH=${VENV_DIR}/bin:/usr/local/bin:/usr/bin
 EnvironmentFile=${DEPLOY_DIR}/.env
 
-# 日志
+# Logging
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=finagent
@@ -312,29 +312,29 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable finagent
-info "systemd 服务已配置"
+info "systemd service configured"
 
-# ==================== 启动服务 ====================
+# ==================== Start Service ====================
 echo ""
-info "=== 部署完成 ==="
+info "=== Deployment Complete ==="
 echo ""
-echo "启动服务: sudo systemctl start finagent"
-echo "查看状态: sudo systemctl status finagent"
-echo "查看日志: sudo journalctl -u finagent -f"
-echo "停止服务: sudo systemctl stop finagent"
+echo "Start service:  sudo systemctl start finagent"
+echo "Check status:   sudo systemctl status finagent"
+echo "View logs:      sudo journalctl -u finagent -f"
+echo "Stop service:   sudo systemctl stop finagent"
 echo ""
 
-# 检查 API Key 是否配置
+# Check if API Key is configured
 if [ -z "$LLM_API_KEY" ]; then
-    warn "LLM_API_KEY 未设置！"
-    warn "请编辑 $DEPLOY_DIR/.env 填入你的 API Key"
-    warn "然后运行: sudo systemctl start finagent"
+    warn "LLM_API_KEY is not set!"
+    warn "Please edit $DEPLOY_DIR/.env and fill in your API Key"
+    warn "Then run: sudo systemctl start finagent"
 else
-    info "正在启动服务..."
+    info "Starting service..."
     sudo systemctl start finagent
     sleep 2
     sudo systemctl status finagent --no-pager -l
 fi
 
 echo ""
-info "CLI 测试命令: $VENV_DIR/bin/nanobot agent -m '查 600519'"
+info "CLI test command: $VENV_DIR/bin/nanobot agent -m 'Check 600519'"
