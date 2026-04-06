@@ -15,8 +15,8 @@ info()  { echo -e "${GREEN}[INFO]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
-# ==================== 配置区（部署前修改） ====================
-# LLM 提供商: deepseek / qwen / openrouter / opencode
+# ==================== 配置区（从 .env 读取） ====================
+# LLM 提供商: deepseek / opencode / minimax / qwen / openrouter
 LLM_PROVIDER="${LLM_PROVIDER:-deepseek}"
 LLM_API_KEY="${LLM_API_KEY:-}"
 LLM_API_BASE="${LLM_API_BASE:-}"
@@ -26,26 +26,52 @@ LLM_MODEL="${LLM_MODEL:-}"
 if [ -z "$LLM_API_BASE" ]; then
     case "$LLM_PROVIDER" in
         deepseek)   LLM_API_BASE="https://api.deepseek.com/v1" ;;
+        opencode)   LLM_API_BASE="https://api.opencode.ai/v1" ;;
+        minimax)    LLM_API_BASE="https://api.minimax.chat/v1" ;;
         qwen)       LLM_API_BASE="https://dashscope.aliyuncs.com/compatible-mode/v1" ;;
         openrouter) LLM_API_BASE="https://openrouter.ai/api/v1" ;;
-        opencode)   LLM_API_BASE="https://api.opencode.ai/v1" ;;
         *)          LLM_API_BASE="https://api.deepseek.com/v1" ;;
     esac
 fi
 if [ -z "$LLM_MODEL" ]; then
     case "$LLM_PROVIDER" in
         deepseek)   LLM_MODEL="deepseek/deepseek-chat" ;;
+        opencode)   LLM_MODEL="opencode/default" ;;
+        minimax)    LLM_MODEL="minimax/MiniMax-M1" ;;
         qwen)       LLM_MODEL="qwen/qwen-plus" ;;
         openrouter) LLM_MODEL="openrouter/auto" ;;
-        opencode)   LLM_MODEL="opencode/default" ;;
         *)          LLM_MODEL="deepseek/deepseek-chat" ;;
     esac
 fi
 
-# 飞书配置（可选，留空则不启用）
+# 渠道配置（可选，留空则不启用）
 FEISHU_ENABLED="${FEISHU_ENABLED:-false}"
 FEISHU_APP_ID="${FEISHU_APP_ID:-}"
 FEISHU_APP_SECRET="${FEISHU_APP_SECRET:-}"
+WECHAT_ENABLED="${WECHAT_ENABLED:-false}"
+DINGTALK_ENABLED="${DINGTALK_ENABLED:-false}"
+DINGTALK_APP_KEY="${DINGTALK_APP_KEY:-}"
+DINGTALK_APP_SECRET="${DINGTALK_APP_SECRET:-}"
+QQ_ENABLED="${QQ_ENABLED:-false}"
+QQ_APP_ID="${QQ_APP_ID:-}"
+QQ_APP_SECRET="${QQ_APP_SECRET:-}"
+EMAIL_ENABLED="${EMAIL_ENABLED:-false}"
+EMAIL_IMAP_HOST="${EMAIL_IMAP_HOST:-imap.example.com}"
+EMAIL_IMAP_PORT="${EMAIL_IMAP_PORT:-993}"
+EMAIL_IMAP_USER="${EMAIL_IMAP_USER:-}"
+EMAIL_IMAP_PASSWORD="${EMAIL_IMAP_PASSWORD:-}"
+EMAIL_SMTP_HOST="${EMAIL_SMTP_HOST:-smtp.example.com}"
+EMAIL_SMTP_PORT="${EMAIL_SMTP_PORT:-465}"
+EMAIL_SMTP_USER="${EMAIL_SMTP_USER:-}"
+EMAIL_SMTP_PASSWORD="${EMAIL_SMTP_PASSWORD:-}"
+TELEGRAM_ENABLED="${TELEGRAM_ENABLED:-false}"
+TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+DISCORD_ENABLED="${DISCORD_ENABLED:-false}"
+DISCORD_BOT_TOKEN="${DISCORD_BOT_TOKEN:-}"
+WHATSAPP_ENABLED="${WHATSAPP_ENABLED:-false}"
+SLACK_ENABLED="${SLACK_ENABLED:-false}"
+SLACK_BOT_TOKEN="${SLACK_BOT_TOKEN:-}"
+SLACK_APP_TOKEN="${SLACK_APP_TOKEN:-}"
 
 # 部署路径
 DEPLOY_DIR="${DEPLOY_DIR:-$HOME/finagent}"
@@ -124,6 +150,70 @@ info "[5/7] 初始化 Nanobot 配置..."
 NANOBOT_CONFIG="$HOME/.nanobot/config.json"
 mkdir -p "$HOME/.nanobot"
 
+# 构建 channels JSON
+CHANNELS_JSON="{"
+
+# 飞书
+CHANNELS_JSON+="\"feishu\": {\"enabled\": ${FEISHU_ENABLED}"
+if [ -n "$FEISHU_APP_ID" ]; then
+    CHANNELS_JSON+=", \"appId\": \"${FEISHU_APP_ID}\", \"appSecret\": \"${FEISHU_APP_SECRET}\""
+fi
+CHANNELS_JSON+="}"
+
+# 微信
+CHANNELS_JSON+=", \"weixin\": {\"enabled\": ${WECHAT_ENABLED}}"
+
+# 钉钉
+CHANNELS_JSON+=", \"dingtalk\": {\"enabled\": ${DINGTALK_ENABLED}"
+if [ -n "$DINGTALK_APP_KEY" ]; then
+    CHANNELS_JSON+=", \"appKey\": \"${DINGTALK_APP_KEY}\", \"appSecret\": \"${DINGTALK_APP_SECRET}\""
+fi
+CHANNELS_JSON+="}"
+
+# QQ
+CHANNELS_JSON+=", \"qq\": {\"enabled\": ${QQ_ENABLED}"
+if [ -n "$QQ_APP_ID" ]; then
+    CHANNELS_JSON+=", \"appId\": \"${QQ_APP_ID}\", \"appSecret\": \"${QQ_APP_SECRET}\""
+fi
+CHANNELS_JSON+="}"
+
+# Email
+CHANNELS_JSON+=", \"email\": {\"enabled\": ${EMAIL_ENABLED}"
+if [ -n "$EMAIL_IMAP_USER" ]; then
+    CHANNELS_JSON+=", \"imapHost\": \"${EMAIL_IMAP_HOST}\", \"imapPort\": ${EMAIL_IMAP_PORT}"
+    CHANNELS_JSON+=", \"imapUser\": \"${EMAIL_IMAP_USER}\", \"imapPassword\": \"${EMAIL_IMAP_PASSWORD}\""
+fi
+if [ -n "$EMAIL_SMTP_USER" ]; then
+    CHANNELS_JSON+=", \"smtpHost\": \"${EMAIL_SMTP_HOST}\", \"smtpPort\": ${EMAIL_SMTP_PORT}"
+    CHANNELS_JSON+=", \"smtpUser\": \"${EMAIL_SMTP_USER}\", \"smtpPassword\": \"${EMAIL_SMTP_PASSWORD}\""
+fi
+CHANNELS_JSON+="}"
+
+# Telegram
+CHANNELS_JSON+=", \"telegram\": {\"enabled\": ${TELEGRAM_ENABLED}"
+if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+    CHANNELS_JSON+=", \"botToken\": \"${TELEGRAM_BOT_TOKEN}\""
+fi
+CHANNELS_JSON+="}"
+
+# Discord
+CHANNELS_JSON+=", \"discord\": {\"enabled\": ${DISCORD_ENABLED}"
+if [ -n "$DISCORD_BOT_TOKEN" ]; then
+    CHANNELS_JSON+=", \"botToken\": \"${DISCORD_BOT_TOKEN}\""
+fi
+CHANNELS_JSON+="}"
+
+# WhatsApp
+CHANNELS_JSON+=", \"whatsapp\": {\"enabled\": ${WHATSAPP_ENABLED}}"
+
+# Slack
+CHANNELS_JSON+=", \"slack\": {\"enabled\": ${SLACK_ENABLED}"
+if [ -n "$SLACK_BOT_TOKEN" ]; then
+    CHANNELS_JSON+=", \"botToken\": \"${SLACK_BOT_TOKEN}\", \"appToken\": \"${SLACK_APP_TOKEN}\""
+fi
+CHANNELS_JSON+="}"
+CHANNELS_JSON+="}"
+
 cat > "$NANOBOT_CONFIG" << EOF
 {
   "providers": {
@@ -140,13 +230,7 @@ cat > "$NANOBOT_CONFIG" << EOF
       "memoryWindow": 50
     }
   },
-  "channels": {
-    "feishu": {
-      "enabled": ${FEISHU_ENABLED},
-      "appId": "${FEISHU_APP_ID}",
-      "appSecret": "${FEISHU_APP_SECRET}"
-    }
-  },
+  "channels": ${CHANNELS_JSON},
   "tools": {
     "restrictToWorkspace": false
   }
@@ -208,7 +292,7 @@ echo ""
 # 检查 API Key 是否配置
 if [ -z "$LLM_API_KEY" ]; then
     warn "LLM_API_KEY 未设置！"
-    warn "请编辑 $NANOBOT_CONFIG 填入你的 API Key"
+    warn "请编辑 $DEPLOY_DIR/.env 填入你的 API Key"
     warn "然后运行: sudo systemctl start finagent"
 else
     info "正在启动服务..."
