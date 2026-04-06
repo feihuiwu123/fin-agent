@@ -105,6 +105,22 @@ if [ "$(id -u)" -eq 0 ]; then
     error "禁止使用 root 运行此脚本！请创建普通用户后部署\n  示例: useradd -m finagent && su - finagent"
 fi
 
+# 检查 sudo 前置条件（不触发密码提示）
+CURRENT_USER="$(whoami)"
+if ! id -nG | grep -qw sudo; then
+    error "当前用户 '$CURRENT_USER' 不在 sudo 组！
+
+请切换到 root 用户后执行以下修复步骤：
+  su -
+  # 1. 将用户加入 sudo 组
+  usermod -aG sudo $CURRENT_USER
+  # 2. 为用户设置密码（部署时需要 sudo 密码）
+  passwd $CURRENT_USER
+  # 3. 切回用户重新部署
+  su - $CURRENT_USER
+  bash scripts/deploy.sh"
+fi
+
 # 检查系统
 if ! command -v apt &>/dev/null; then
     warn "非 Debian/Ubuntu 系统，可能需要手动安装依赖"
