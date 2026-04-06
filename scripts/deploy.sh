@@ -108,15 +108,30 @@ fi
 
 # ==================== 1. 安装系统依赖 ====================
 info "[1/7] 安装系统依赖..."
-sudo apt update -qq
-sudo apt install -y python3.11 python3.11-venv python3-pip git curl 2>/dev/null || {
-    warn "python3.11 安装失败，尝试 python3.12..."
-    sudo apt install -y python3.12 python3.12-venv python3-pip git curl 2>/dev/null || {
+
+# 优先检测系统已有 Python 3.11+
+PYTHON=""
+for ver in python3.13 python3.12 python3.11; do
+    if command -v $ver &>/dev/null; then
+        PYTHON=$ver
+        break
+    fi
+done
+
+if [ -z "$PYTHON" ]; then
+    sudo apt update -qq
+    for ver in 13 12 11; do
+        info "尝试安装 python3.${ver}..."
+        sudo apt install -y python3.${ver} python3.${ver}-venv python3-pip git curl 2>/dev/null && {
+            PYTHON="python3.${ver}"
+            break
+        }
+    done
+    if [ -z "$PYTHON" ]; then
         error "Python 3.11+ 安装失败，请手动安装"
-    }
-    PYTHON="python3.12"
-}
-PYTHON="${PYTHON:-python3.11}"
+    fi
+fi
+
 info "Python 版本: $($PYTHON --version)"
 
 # ==================== 2. 克隆/更新代码 ====================
