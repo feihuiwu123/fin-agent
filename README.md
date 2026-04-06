@@ -187,7 +187,28 @@ nanobot onboard
 
 ### 配置
 
-编辑 `~/.nanobot/config.json`：
+复制环境变量模板并填入你的密钥：
+
+```bash
+cp .env.example .env
+# 编辑 .env 文件，填入你的 API Key
+```
+
+`.env` 文件已加入 `.gitignore`，不会被提交到 Git，保证密钥安全：
+
+```bash
+# .env — 密钥配置（不会上传到 Git）
+LLM_PROVIDER=deepseek
+LLM_API_KEY=sk-your-key-here
+LLM_API_BASE=https://api.deepseek.com/v1
+LLM_MODEL=deepseek/deepseek-chat
+
+FEISHU_ENABLED=false
+FEISHU_APP_ID=your-feishu-app-id
+FEISHU_APP_SECRET=your-feishu-app-secret
+```
+
+部署脚本会自动从 `.env` 读取配置并生成 Nanobot 配置。如需手动配置 `~/.nanobot/config.json`：
 
 ```jsonc
 {

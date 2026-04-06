@@ -1,2 +1,9 @@
 .DS_Store
 .ruff_cache
+.env
+__pycache__/
+*.egg-info/
+*.egg-info
+*.pyc
+.venv/
+*.db

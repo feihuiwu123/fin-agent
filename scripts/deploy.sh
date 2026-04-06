@@ -55,6 +55,21 @@ VENV_DIR="${DEPLOY_DIR}/.venv"
 info "=== FinAgent 部署脚本 ==="
 info "部署目录: $DEPLOY_DIR"
 
+# 加载 .env 环境变量
+if [ -f "$DEPLOY_DIR/.env" ]; then
+    info "加载 .env 环境变量..."
+    set -a
+    source "$DEPLOY_DIR/.env"
+    set +a
+elif [ -f ".env" ]; then
+    info "加载 .env 环境变量..."
+    set -a
+    source ".env"
+    set +a
+else
+    warn ".env 文件不存在，将使用环境变量或默认值"
+fi
+
 # 检查是否 root
 if [ "$(id -u)" -eq 0 ]; then
     error "请不要使用 root 运行此脚本，使用普通用户即可"
@@ -161,11 +176,11 @@ After=network.target
 Type=simple
 User=$(whoami)
 WorkingDirectory=${DEPLOY_DIR}
-ExecStart=${VENV_DIR}/bin/nanobot gateway
+ExecStart=/bin/bash -c 'set -a; source ${DEPLOY_DIR}/.env; set +a; ${VENV_DIR}/bin/nanobot gateway'
 Restart=always
 RestartSec=10
 Environment=PATH=${VENV_DIR}/bin:/usr/local/bin:/usr/bin
-Environment=FINAGENT_DB_PATH=${DEPLOY_DIR}/finagent.db
+EnvironmentFile=${DEPLOY_DIR}/.env
 
 # 日志
 StandardOutput=journal

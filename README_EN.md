@@ -187,7 +187,28 @@ nanobot onboard
 
 ### Configuration
 
-Edit `~/.nanobot/config.json`:
+Copy the environment variable template and fill in your credentials:
+
+```bash
+cp .env.example .env
+# Edit the .env file with your API Key
+```
+
+The `.env` file is included in `.gitignore` and will never be committed to Git, keeping your keys safe:
+
+```bash
+# .env — Credentials (never uploaded to Git)
+LLM_PROVIDER=deepseek
+LLM_API_KEY=sk-your-key-here
+LLM_API_BASE=https://api.deepseek.com/v1
+LLM_MODEL=deepseek/deepseek-chat
+
+FEISHU_ENABLED=false
+FEISHU_APP_ID=your-feishu-app-id
+FEISHU_APP_SECRET=your-feishu-app-secret
+```
+
+The deploy script automatically reads configuration from `.env`. If you need to manually configure `~/.nanobot/config.json`:
 
 ```jsonc
 {
