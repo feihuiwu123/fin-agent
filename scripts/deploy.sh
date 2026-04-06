@@ -73,8 +73,12 @@ SLACK_ENABLED="${SLACK_ENABLED:-false}"
 SLACK_BOT_TOKEN="${SLACK_BOT_TOKEN:-}"
 SLACK_APP_TOKEN="${SLACK_APP_TOKEN:-}"
 
-# 部署路径
-DEPLOY_DIR="${DEPLOY_DIR:-$HOME/finagent}"
+# 部署路径（优先使用当前目录，如果已有 .env 或 .git）
+if [ -f ".env" ] || [ -d ".git" ]; then
+    DEPLOY_DIR="$(pwd)"
+else
+    DEPLOY_DIR="${DEPLOY_DIR:-$HOME/fin-agent}"
+fi
 VENV_DIR="${DEPLOY_DIR}/.venv"
 
 # ==================== 前置检查 ====================
