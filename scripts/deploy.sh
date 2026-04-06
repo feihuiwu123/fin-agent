@@ -48,6 +48,8 @@ fi
 FEISHU_ENABLED="${FEISHU_ENABLED:-false}"
 FEISHU_APP_ID="${FEISHU_APP_ID:-}"
 FEISHU_APP_SECRET="${FEISHU_APP_SECRET:-}"
+FEISHU_CHAT_ID="${FEISHU_CHAT_ID:-}"
+FEISHU_WEBHOOK_URL="${FEISHU_WEBHOOK_URL:-}"
 WECHAT_ENABLED="${WECHAT_ENABLED:-false}"
 DINGTALK_ENABLED="${DINGTALK_ENABLED:-false}"
 DINGTALK_APP_KEY="${DINGTALK_APP_KEY:-}"
@@ -295,6 +297,7 @@ After=network.target
 Type=simple
 User=$(whoami)
 WorkingDirectory=${DEPLOY_DIR}
+ExecStartPre=${DEPLOY_DIR}/scripts/notify-start.sh
 ExecStart=/bin/bash -c 'set -a; source ${DEPLOY_DIR}/.env; set +a; ${VENV_DIR}/bin/nanobot gateway'
 Restart=always
 RestartSec=10
@@ -309,6 +312,66 @@ SyslogIdentifier=finagent
 [Install]
 WantedBy=multi-user.target
 EOF
+
+# Create startup notification script
+cat > "${DEPLOY_DIR}/scripts/notify-start.sh" << 'NOTIFY_EOF'
+#!/bin/bash
+# Sends a Feishu notification when the service starts
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DEPLOY_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Load .env
+if [ -f "$DEPLOY_DIR/.env" ]; then
+    set -a
+    source "$DEPLOY_DIR/.env"
+    set +a
+fi
+
+FEISHU_CHAT_ID="${FEISHU_CHAT_ID:-}"
+FEISHU_WEBHOOK_URL="${FEISHU_WEBHOOK_URL:-}"
+FEISHU_APP_ID="${FEISHU_APP_ID:-}"
+FEISHU_APP_SECRET="${FEISHU_APP_SECRET:-}"
+
+hostname="$(hostname)"
+notify_msg="**FinAgent Started** ✅\n\nHost: \`${hostname}\`\nTime: $(date '+%Y-%m-%d %H:%M:%S')"
+
+send_notify() {
+    # Method 1: Webhook
+    if [ -n "$FEISHU_WEBHOOK_URL" ]; then
+        local payload
+        payload=$(printf '{"msg_type":"interactive","card":{"header":{"title":{"tag":"plain_text","content":"FinAgent Started ✅"}},"elements":[{"tag":"markdown","content":"%s"}]}}' "$notify_msg")
+        curl -s --max-time 10 -X POST "$FEISHU_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$payload" > /dev/null 2>&1
+        return
+    fi
+
+    # Method 2: Open API
+    if [ -n "$FEISHU_APP_ID" ] && [ -n "$FEISHU_APP_SECRET" ] && [ -n "$FEISHU_CHAT_ID" ]; then
+        local token_response token
+        token_response=$(curl -s --max-time 10 -X POST "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal" \
+            -H "Content-Type: application/json" \
+            -d "{\"app_id\":\"$FEISHU_APP_ID\",\"app_secret\":\"$FEISHU_APP_SECRET\"}" 2>/dev/null) || return 0
+
+        token=$(echo "$token_response" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tenant_access_token',''))" 2>/dev/null) || return 0
+        [ -z "$token" ] && return 0
+
+        local card_body
+        card_body=$(printf '{"msg_type":"interactive","card":{"header":{"title":{"tag":"plain_text","content":"FinAgent Started ✅"}},"elements":[{"tag":"markdown","content":"%s"}]}}' "$notify_msg")
+
+        curl -s --max-time 10 -X POST "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id" \
+            -H "Authorization: Bearer $token" \
+            -H "Content-Type: application/json" \
+            -d "{\"receive_id\":\"$FEISHU_CHAT_ID\",$(echo "$card_body" | python3 -c "import sys; d=sys.stdin.read(); print(d[d.index(',')+1:])" 2>/dev/null)}" > /dev/null 2>&1 || true
+    fi
+}
+
+send_notify
+exit 0  # Never block service startup
+NOTIFY_EOF
+chmod +x "${DEPLOY_DIR}/scripts/notify-start.sh"
 
 sudo systemctl daemon-reload
 sudo systemctl enable finagent
@@ -335,6 +398,71 @@ else
     sleep 2
     sudo systemctl status finagent --no-pager -l
 fi
+
+echo ""
+
+# ==================== Feishu Deployment Notification ====================
+send_feishu_notification() {
+    local hostname
+    hostname="$(hostname)"
+    local notify_msg
+    notify_msg="**FinAgent Deployed** ✅\n\nHost: \`${hostname}\`\nTime: $(date '+%Y-%m-%d %H:%M:%S')\nStatus: Running"
+
+    # Method 1: Webhook (simplest)
+    if [ -n "$FEISHU_WEBHOOK_URL" ]; then
+        local payload
+        payload=$(printf '{"msg_type":"interactive","card":{"header":{"title":{"tag":"plain_text","content":"FinAgent Deployed ✅"}},"elements":[{"tag":"markdown","content":"%s"}]}}' "$notify_msg")
+        curl -s -X POST "$FEISHU_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$payload" > /dev/null 2>&1 && \
+            info "Feishu notification sent via webhook" || \
+            warn "Failed to send Feishu webhook notification"
+        return
+    fi
+
+    # Method 2: Feishu Open API (using app_id/app_secret + chat_id)
+    if [ -n "$FEISHU_APP_ID" ] && [ -n "$FEISHU_APP_SECRET" ] && [ -n "$FEISHU_CHAT_ID" ]; then
+        # Get tenant_access_token
+        local token_response
+        token_response=$(curl -s -X POST "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal" \
+            -H "Content-Type: application/json" \
+            -d "{\"app_id\":\"$FEISHU_APP_ID\",\"app_secret\":\"$FEISHU_APP_SECRET\"}" 2>/dev/null)
+
+        local token
+        token=$(echo "$token_response" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tenant_access_token',''))" 2>/dev/null)
+
+        if [ -n "$token" ]; then
+            local card_body
+            card_body=$(printf '{"msg_type":"interactive","card":{"header":{"title":{"tag":"plain_text","content":"FinAgent Deployed ✅"}},"elements":[{"tag":"markdown","content":"%s"}]}}' "$notify_msg")
+
+            local send_response
+            send_response=$(curl -s -X POST "https://open.feishu.cn/open-apis/im/v1/messages?receive_id_type=chat_id" \
+                -H "Authorization: Bearer $token" \
+                -H "Content-Type: application/json" \
+                -d "{\"receive_id\":\"$FEISHU_CHAT_ID\",$(echo "$card_body" | python3 -c "import sys; d=sys.stdin.read(); print(d[d.index(',')+1:])" 2>/dev/null)}" 2>/dev/null)
+
+            local send_code
+            send_code=$(echo "$send_response" | python3 -c "import sys,json; print(json.load(sys.stdin).get('code',-1))" 2>/dev/null)
+
+            if [ "$send_code" = "0" ]; then
+                info "Feishu notification sent via Open API"
+            else
+                warn "Feishu API returned code=$send_response"
+            fi
+        else
+            warn "Failed to get Feishu tenant_access_token"
+        fi
+        return
+    fi
+
+    # No notification configured
+    if [ -n "$FEISHU_APP_ID" ] && [ -z "$FEISHU_CHAT_ID" ]; then
+        warn "FEISHU_CHAT_ID not set — no startup notification will be sent"
+        warn "Add FEISHU_CHAT_ID to .env to receive a message when the bot starts"
+    fi
+}
+
+send_feishu_notification
 
 echo ""
 info "CLI test command: $VENV_DIR/bin/nanobot agent -m 'Check 600519'"
