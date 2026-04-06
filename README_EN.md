@@ -165,7 +165,7 @@ class CryptoAdapter(DataAdapter): ...   # Crypto (CCXT)
 ### Prerequisites
 
 - Python 3.11+
-- An LLM API Key (DeepSeek / Qwen / OpenRouter recommended)
+- An LLM API Key (DeepSeek / Qwen / OpenRouter / OpenCode recommended)
 - Feishu enterprise self-built app (for Bot integration)
 
 ### Installation

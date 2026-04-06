@@ -165,7 +165,7 @@ class CryptoAdapter(DataAdapter): ...   # 加密货币 (CCXT)
 ### 前置条件
 
 - Python 3.11+
-- 一个 LLM API Key（推荐 DeepSeek / Qwen / OpenRouter）
+- 一个 LLM API Key（推荐 DeepSeek / Qwen / OpenRouter / OpenCode）
 - 飞书企业自建应用（用于Bot接入）
 
 ### 安装

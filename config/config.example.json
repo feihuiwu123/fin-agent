@@ -7,6 +7,14 @@
     "qwen": {
       "apiKey": "YOUR_DASHSCOPE_API_KEY",
       "apiBase": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    },
+    "openrouter": {
+      "apiKey": "sk-or-YOUR_API_KEY",
+      "apiBase": "https://openrouter.ai/api/v1"
+    },
+    "opencode": {
+      "apiKey": "YOUR_API_KEY",
+      "apiBase": "https://api.opencode.ai/v1"
     }
   },
   "agents": {

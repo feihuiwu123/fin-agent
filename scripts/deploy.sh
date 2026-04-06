@@ -16,11 +16,31 @@ warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
 # ==================== 配置区（部署前修改） ====================
-# LLM 提供商: deepseek / qwen / openai
+# LLM 提供商: deepseek / qwen / openrouter / opencode
 LLM_PROVIDER="${LLM_PROVIDER:-deepseek}"
 LLM_API_KEY="${LLM_API_KEY:-}"
-LLM_API_BASE="${LLM_API_BASE:-https://api.deepseek.com/v1}"
-LLM_MODEL="${LLM_MODEL:-deepseek/deepseek-chat}"
+LLM_API_BASE="${LLM_API_BASE:-}"
+LLM_MODEL="${LLM_MODEL:-}"
+
+# 根据提供商自动设置默认值
+if [ -z "$LLM_API_BASE" ]; then
+    case "$LLM_PROVIDER" in
+        deepseek)   LLM_API_BASE="https://api.deepseek.com/v1" ;;
+        qwen)       LLM_API_BASE="https://dashscope.aliyuncs.com/compatible-mode/v1" ;;
+        openrouter) LLM_API_BASE="https://openrouter.ai/api/v1" ;;
+        opencode)   LLM_API_BASE="https://api.opencode.ai/v1" ;;
+        *)          LLM_API_BASE="https://api.deepseek.com/v1" ;;
+    esac
+fi
+if [ -z "$LLM_MODEL" ]; then
+    case "$LLM_PROVIDER" in
+        deepseek)   LLM_MODEL="deepseek/deepseek-chat" ;;
+        qwen)       LLM_MODEL="qwen/qwen-plus" ;;
+        openrouter) LLM_MODEL="openrouter/auto" ;;
+        opencode)   LLM_MODEL="opencode/default" ;;
+        *)          LLM_MODEL="deepseek/deepseek-chat" ;;
+    esac
+fi
 
 # 飞书配置（可选，留空则不启用）
 FEISHU_ENABLED="${FEISHU_ENABLED:-false}"
