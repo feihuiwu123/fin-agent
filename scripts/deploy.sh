@@ -35,7 +35,7 @@ if [ -z "$LLM_API_BASE" ]; then
 fi
 if [ -z "$LLM_MODEL" ]; then
     case "$LLM_PROVIDER" in
-        deepseek)   LLM_MODEL="deepseek/deepseek-chat" ;;
+        deepseek)   LLM_MODEL="deepseek-chat" ;;
         opencode)   LLM_MODEL="opencode/default" ;;
         minimax)    LLM_MODEL="minimax/MiniMax-M1" ;;
         qwen)       LLM_MODEL="qwen/qwen-plus" ;;
