@@ -5,16 +5,16 @@
 <h1 align="center">FinAgent 📊</h1>
 
 <p align="center">
-  <strong>基于逻辑闭环的 A 股智能投研助理 | Logic-Closed-Loop A-Share Investment Research Assistant</strong>
+  <strong>基于逻辑闭环的 A 股智能投研助理</strong>
 </p>
 
 <p align="center">
-  <a href="#快速开始--quick-start">快速开始</a> •
-  <a href="#核心功能--core-features">功能</a> •
-  <a href="#系统架构--system-architecture">架构</a> •
-  <a href="#技能清单--skill-list">技能</a> •
-  <a href="#路线图--roadmap">路线图</a> •
-  <a href="#贡献指南--contributing">贡献</a> •
+  <a href="#快速开始">快速开始</a> •
+  <a href="#核心功能">功能</a> •
+  <a href="#系统架构">架构</a> •
+  <a href="#技能清单">技能</a> •
+  <a href="#路线图">路线图</a> •
+  <a href="#贡献指南">贡献</a> •
   <a href="./README_EN.md">English</a>
 </p>
 
@@ -22,94 +22,79 @@
   <img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python" />
   <img src="https://img.shields.io/badge/framework-nanobot-orange.svg" alt="Nanobot" />
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" />
-  <img src="https://img.shields.io/badge/lang-中文%20%7C%20English-brightgreen.svg" alt="Bilingual" />
 </p>
 
 ---
 
-## 这是什么？ | What is this?
+## 这是什么？
 
 FinAgent 是一个开源的 A 股智能投研助理，基于 [Nanobot](https://github.com/HKUDS/nanobot) 轻量级 AI Agent 框架构建，通过飞书机器人进行交互。
 
 **它不是另一个"AI选股工具"。** 市面上大多数 AI 炒股工具的做法是罗列指标、堆砌数据，然后给你一个模糊的"推荐买入"。FinAgent 不同——它的核心设计原则是**逻辑闭环**：每一条分析结论都必须有完整的因果推导链条，并且明确给出"什么情况下逻辑不成立"。
 
-FinAgent is an open-source A-share intelligent investment research assistant built on the [Nanobot](https://github.com/HKUDS/nanobot) lightweight AI Agent framework, with Feishu (Lark) bot as its primary interface.
-
-**It is NOT another "AI stock picker."** Most AI trading tools simply list indicators and give vague "buy" signals. FinAgent is different — its core design principle is the **Logic Closed-Loop**: every conclusion must come with a complete causal reasoning chain and explicit invalidation conditions.
-
 ```
-📰 触发信号 (Trigger)
-  → 🧠 第一性原理推导 (First-Principles Reasoning)
-    → 🔗 产业链映射 (Industry Chain Mapping)
-      → 📊 数据验证 (Data Validation)
-        → 💰 估值与位置 (Valuation & Position)
-          → ✅ 操作建议 + ❌ 失效条件 (Action + Invalidation)
+📰 触发信号
+  → 🧠 第一性原理推导
+    → 🔗 产业链映射
+      → 📊 数据验证
+        → 💰 估值与位置
+          → ✅ 操作建议 + ❌ 失效条件
 ```
 
 ---
 
-## 核心功能 | Core Features
+## 核心功能
 
-### 📊 逻辑分析 | Logic Analysis
+### 📊 逻辑分析
 
 输入一只股票代码，获得一份**逻辑闭环验证报告**，而不是传统研报。
 
-Enter a stock code and get a **logic-closed-loop verification report**, not a traditional research note.
+- **商业模式识别** — 这家公司赚钱的本质是什么？
+- **护城河评估** — 壁垒是在加强还是削弱？
+- **政策映射** — 有无国家级政策支撑？
+- **财务验证** — 数据是否支撑逻辑？
+- **闭环结论** — 赚钱逻辑是否成立 + 失效条件
 
-- **商业模式识别** — 这家公司赚钱的本质是什么？| What's the business model?
-- **护城河评估** — 壁垒是在加强还是削弱？| Is the moat strengthening or weakening?
-- **政策映射** — 有无国家级政策支撑？| Government policy support?
-- **财务验证** — 数据是否支撑逻辑？| Do financials support the thesis?
-- **闭环结论** — 赚钱逻辑是否成立 + 失效条件 | Conclusion + invalidation conditions
-
-### 📡 市场雷达 | Market Radar
+### 📡 市场雷达
 
 不是简单的新闻聚合，而是**从新闻/政策中推导投资逻辑链**。
 
-Not a news aggregator, but **deriving investment logic chains from news/policy**.
+- **大盘体温计** — 情绪指标（极度乐观/观望/恐慌）
+- **逻辑链推导** — 事件→产业影响→受益环节→具体标的
+- **三梯队映射** — 直接受益 / 间接受益 / 主题受益
+- **持仓关联** — 自动交叉验证热点与你的持仓
+- **每日推送** — 盘前08:30 / 盘后15:15 自动推送飞书
 
-- **大盘体温计** — 情绪指标（极度乐观/观望/恐慌）| Market sentiment
-- **逻辑链推导** — 事件→产业影响→受益环节→具体标的 | Event → industry → targets
-- **三梯队映射** — 直接受益 / 间接受益 / 主题受益 | Three-tier beneficiary mapping
-- **持仓关联** — 自动交叉验证热点与你的持仓 | Cross-reference with your portfolio
-- **每日推送** — 盘前08:30 / 盘后15:15 自动推送飞书 | Auto-push via Feishu
-
-### 📈 K线决策 | Chart Decision
+### 📈 K线决策
 
 不是展示指标数值，而是**直接回答"现在该怎么操作"**。
 
-Not displaying indicator values, but **directly answering "what should I do now"**.
+- **量能形态** — 倍量 / 缩倍量 / 梯量 / 地量识别
+- **趋势判断** — 均线排列 + 多周期共振
+- **决策输出** — 持有/加仓/减仓/清仓 + 止盈止损位 + 盈亏比
+- **逻辑回检** — 当初买入的逻辑是否还在？
 
-- **量能形态** — 倍量 / 缩倍量 / 梯量 / 地量识别 | Volume pattern recognition
-- **趋势判断** — 均线排列 + 多周期共振 | MA alignment + multi-timeframe
-- **决策输出** — 持有/加仓/减仓/清仓 + 止盈止损位 + 盈亏比 | Action + levels + R:R ratio
-- **逻辑回检** — 当初买入的逻辑是否还在？| Is the original thesis still valid?
+### ⚡ 执行与风控
 
-### ⚡ 执行与风控 | Execution & Risk Control
-
-- **飞书交互** — 自然语言指令（`查600519` / `看大盘` / `K线 300750`）| Feishu NL commands
-- **条件预警** — 价格突破/跌破、倍量异动、MACD金叉等 | Conditional alerts
-- **交易预留** — QMT/PTrade/通达信接口预留，HITL人工确认 | Trade gateway (reserved)
-- **风控硬限** — 单股最大仓位、单日亏损上限、总回撤保护 | Hard risk limits
+- **飞书交互** — 自然语言指令（`查600519` / `看大盘` / `K线 300750`）
+- **条件预警** — 价格突破/跌破、倍量异动、MACD金叉等
+- **交易预留** — QMT/PTrade/通达信接口预留，HITL人工确认
+- **风控硬限** — 单股最大仓位、单日亏损上限、总回撤保护
 
 ---
 
-## 系统架构 | System Architecture
+## 系统架构
 
-### 一个 Nanobot，四组 Skills | One Nanobot, Four Skill Groups
+### 一个 Nanobot，四组 Skills
 
 FinAgent 运行在**单个 Nanobot 实例**上。四个功能域不是四个独立进程，而是四组 Skill 集合，由同一个 Agent Loop 通过 SOUL.md 中的路由规则统一调度。
-
-FinAgent runs on a **single Nanobot instance**. The four functional domains are four Skill groups, orchestrated by one Agent Loop via routing rules in SOUL.md.
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │              Nanobot Gateway (单实例)                 │
-│              Nanobot Gateway (Single Instance)        │
 ├─────────────────────────────────────────────────────┤
 │                                                       │
 │  SOUL.md ── 角色定义 + 路由规则 + 输出规范              │
-│              Role + Routing + Output Format            │
 │                                                       │
 │  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌────────┐│
 │  │📊 逻辑分析 │ │📡 市场雷达 │ │📈 K线决策  │ │⚡ 执行  ││
@@ -123,7 +108,7 @@ FinAgent runs on a **single Nanobot instance**. The four functional domains are 
 │              └────────┬───────┘                  │     │
 │                       ▼                          ▼     │
 │  ┌──────────────────────────────────────────────────┐  │
-│  │          统一数据层 Unified Data Layer             │  │
+│  │              统一数据层                            │  │
 │  │  ┌─────┐ ┌────────┐ ┌──────┐ ┌─────┐ ┌──────┐  │  │
 │  │  │ QMT │ │AKShare │ │PTrade│ │ TDX │ │ 美股 │  │  │
 │  │  │ ✅  │ │  ✅    │ │ 预留 │ │ 预留 │ │ 预留 │  │  │
@@ -134,26 +119,21 @@ FinAgent runs on a **single Nanobot instance**. The four functional domains are 
 └─────────────────────────────────────────────────────┘
 ```
 
-### 三层业务架构 | Three-Layer Business Architecture
+### 三层业务架构
 
-| 层级 Layer | 职责 Responsibility | 关键组件 Key Components |
-|-----------|--------------------|-----------------------|
+| 层级 | 职责 | 关键组件 |
+|------|------|---------|
 | **L3 交互执行层** | 用户交互 + 交易执行 | 飞书Bot · Cron定时 · 交易网关(QMT/PTrade/TDX) |
-| Interface & Execution | User interaction + Trade execution | Feishu Bot · Cron · Trade Gateway |
 | **L2 智能推理层** | AI推理 + 指标计算 | Nanobot Agent Loop · LLM · Skills · pandas_ta |
-| Intelligence & Reasoning | AI reasoning + Indicator calc | Nanobot Agent Loop · LLM · Skills · pandas_ta |
 | **L1 统一数据层** | 数据获取 + 存储 | DataAdapter(QMT/AKShare/...) · SQLite · Memory |
-| Unified Data | Data fetching + Storage | DataAdapter(QMT/AKShare/...) · SQLite · Memory |
 
-### 数据适配器 | Data Adapter Pattern
+### 数据适配器
 
 所有行情数据源实现同一个抽象接口，新增市场只需实现子类：
 
-All market data sources implement the same abstract interface. Adding a new market only requires implementing a subclass:
-
 ```python
 class DataAdapter(ABC):
-    """统一数据适配器接口 | Unified data adapter interface"""
+    """统一数据适配器接口"""
     def get_kline(self, symbol, period, count) -> pd.DataFrame: ...
     def get_realtime_quote(self, symbol) -> dict: ...
     def get_financials(self, symbol) -> dict: ...
@@ -161,17 +141,17 @@ class DataAdapter(ABC):
     def get_news(self, keywords, days) -> list: ...
 
 class TradeAdapter(ABC):
-    """统一交易接口 | Unified trade interface"""
+    """统一交易接口"""
     def place_order(self, symbol, side, qty, price, order_type): ...
     def cancel_order(self, order_id) -> bool: ...
     def get_positions(self) -> list: ...
     def get_account_info(self) -> dict: ...
 
-# 一期实现 | Phase 1 Implementation
+# 一期实现
 class QMTAdapter(DataAdapter): ...      # 迅投QMT (xtquant)
-class AKShareAdapter(DataAdapter): ...  # AKShare (free)
+class AKShareAdapter(DataAdapter): ...  # AKShare (免费)
 
-# 预留 | Reserved
+# 预留
 class PTradeAdapter(DataAdapter): ...   # 恒生PTrade
 class TDXAdapter(DataAdapter): ...      # 通达信
 class USStockAdapter(DataAdapter): ...  # 美股 (yfinance / IB)
@@ -180,32 +160,32 @@ class CryptoAdapter(DataAdapter): ...   # 加密货币 (CCXT)
 
 ---
 
-## 快速开始 | Quick Start
+## 快速开始
 
-### 前置条件 | Prerequisites
+### 前置条件
 
 - Python 3.11+
 - 一个 LLM API Key（推荐 DeepSeek / Qwen / OpenRouter）
 - 飞书企业自建应用（用于Bot接入）
 
-### 安装 | Installation
+### 安装
 
 ```bash
-# 1. 克隆仓库 | Clone the repo
+# 1. 克隆仓库
 git clone https://github.com/yourname/finagent.git
 cd finagent
 
-# 2. 安装依赖 | Install dependencies
+# 2. 安装依赖
 pip install -e .
 
-# 3. 安装 Nanobot | Install Nanobot
+# 3. 安装 Nanobot
 pip install nanobot-ai
 
-# 4. 初始化配置 | Initialize config
+# 4. 初始化配置
 nanobot onboard
 ```
 
-### 配置 | Configuration
+### 配置
 
 编辑 `~/.nanobot/config.json`：
 
@@ -241,25 +221,24 @@ nanobot onboard
 将 FinAgent 的 Skills 链接到 Nanobot workspace：
 
 ```bash
-# 复制 Skills 和 SOUL.md 到 Nanobot workspace
 cp -r finagent/skills/ ~/.nanobot/workspace/skills/
 cp finagent/SOUL.md ~/.nanobot/workspace/SOUL.md
 ```
 
-### 启动 | Launch
+### 启动
 
 ```bash
-# 命令行模式（调试）| CLI mode (debug)
+# 命令行模式（调试）
 nanobot agent -m "查 600519"
 
-# 启动网关（飞书Bot + 定时任务）| Start gateway (Feishu + Cron)
+# 启动网关（飞书Bot + 定时任务）
 nanobot gateway
 ```
 
-### 飞书指令 | Feishu Commands
+### 飞书指令
 
-| 指令 Command | 功能 Function | 示例 Example |
-|-------------|--------------|-------------|
+| 指令 | 功能 | 示例 |
+|------|------|------|
 | `查 [代码]` | 个股逻辑分析 | `查 600519` |
 | `看大盘` | 市场雷达 | `看大盘` |
 | `K线 [代码]` | K线决策分析 | `K线 300750` |
@@ -271,74 +250,74 @@ nanobot gateway
 
 ---
 
-## 技能清单 | Skill List
+## 技能清单
 
-### P0 — MVP（一期 Phase 1）
+### P0 — MVP（一期）
 
-| 技能 Skill | 组 Group | 功能 Function |
-|-----------|---------|--------------|
-| `skill-biz-model` | 📊 逻辑分析 | 商业模式 + 闭环验证 / Business model + loop verification |
-| `skill-financial` | 📊 逻辑分析 | 财务健康度（营收/ROE/负债率）/ Financial health check |
-| `skill-valuation` | 📊 逻辑分析 | PE/PB 历史分位 / Valuation percentile |
-| `skill-index-pulse` | 📡 市场雷达 | 大盘数据 + 情绪判断 / Index + sentiment |
-| `skill-news-logic` | 📡 市场雷达 | 新闻 → 逻辑链 → 标的 / News → logic chain → targets |
-| `skill-trend` | 📈 K线决策 | 均线排列 + 趋势 / MA alignment + trend |
-| `skill-volume` | 📈 K线决策 | 量能形态（倍量/缩倍量/梯量/地量）/ Volume patterns |
-| `skill-decision` | 📈 K线决策 | 操作建议 + 盈亏比 / Action + risk-reward ratio |
-| `skill-feishu` | ⚡ 执行 | 飞书消息收发 / Feishu messaging |
-| `skill-position` | ⚡ 执行 | 持仓管理 / Position management |
-| `skill-alert` | ⚡ 执行 | 条件预警 / Conditional alerts |
+| 技能 | 组 | 功能 |
+|------|------|------|
+| `skill-biz-model` | 📊 逻辑分析 | 商业模式 + 闭环验证 |
+| `skill-financial` | 📊 逻辑分析 | 财务健康度（营收/ROE/负债率） |
+| `skill-valuation` | 📊 逻辑分析 | PE/PB 历史分位 |
+| `skill-index-pulse` | 📡 市场雷达 | 大盘数据 + 情绪判断 |
+| `skill-news-logic` | 📡 市场雷达 | 新闻 → 逻辑链 → 标的 |
+| `skill-trend` | 📈 K线决策 | 均线排列 + 趋势 |
+| `skill-volume` | 📈 K线决策 | 量能形态（倍量/缩倍量/梯量/地量） |
+| `skill-decision` | 📈 K线决策 | 操作建议 + 盈亏比 |
+| `skill-feishu` | ⚡ 执行 | 飞书消息收发 |
+| `skill-position` | ⚡ 执行 | 持仓管理 |
+| `skill-alert` | ⚡ 执行 | 条件预警 |
 
-### P1 — 二期增强 Phase 2
+### P1 — 二期增强
 
-| 技能 Skill | 功能 Function |
-|-----------|--------------|
-| `skill-policy` | 政策扫描 + 受益映射 / Policy scan + beneficiary mapping |
-| `skill-team` | 管理层 + 股东分析 / Management + shareholder analysis |
-| `skill-moat` | 护城河深度分析 / Deep moat analysis |
-| `skill-sector-flow` | 板块轮动 + 资金流 / Sector rotation + fund flow |
-| `skill-portfolio-link` | 热点与持仓交叉 / Hot topics × portfolio cross-ref |
-| `skill-signal` | MACD/KDJ/BOLL 综合 / Technical signal synthesis |
-| `skill-risk-check` | 风控规则引擎 / Risk control engine |
-| `skill-trade-gateway` | QMT 实盘交易 / QMT live trading |
+| 技能 | 功能 |
+|------|------|
+| `skill-policy` | 政策扫描 + 受益映射 |
+| `skill-team` | 管理层 + 股东分析 |
+| `skill-moat` | 护城河深度分析 |
+| `skill-sector-flow` | 板块轮动 + 资金流 |
+| `skill-portfolio-link` | 热点与持仓交叉 |
+| `skill-signal` | MACD/KDJ/BOLL 综合 |
+| `skill-risk-check` | 风控规则引擎 |
+| `skill-trade-gateway` | QMT 实盘交易 |
 
-### P2 — 长期扩展 Future
+### P2 — 长期扩展
 
-| 技能 Skill | 功能 Function |
-|-----------|--------------|
-| `skill-backtest` | 策略回测 / Strategy backtesting |
-| `skill-sentiment` | 社区舆情 / Community sentiment |
-| `skill-replay` | 交易复盘 / Trade review reports |
-| `skill-us-stock` | 美股适配 / US stock adapter |
-| `skill-hk-stock` | 港股适配 / HK stock adapter |
-| `skill-crypto` | 加密货币适配 / Crypto adapter |
-| `skill-ptrade` | PTrade 适配 / PTrade adapter |
-| `skill-tdx` | 通达信适配 / TDX adapter |
+| 技能 | 功能 |
+|------|------|
+| `skill-backtest` | 策略回测 |
+| `skill-sentiment` | 社区舆情 |
+| `skill-replay` | 交易复盘 |
+| `skill-us-stock` | 美股适配 |
+| `skill-hk-stock` | 港股适配 |
+| `skill-crypto` | 加密货币适配 |
+| `skill-ptrade` | PTrade 适配 |
+| `skill-tdx` | 通达信适配 |
 
 ---
 
-## 项目结构 | Project Structure
+## 项目结构
 
 ```
 finagent/
-├── README.md                    # 本文件 | This file
+├── README.md                    # 本文件（中文）
 ├── README_EN.md                 # English version
 ├── LICENSE                      # MIT License
 ├── pyproject.toml               # Python 项目配置
-├── CONTRIBUTING.md              # 贡献指南 | Contributing guide
-├── SOUL.md                      # Nanobot 人格定义 | Agent personality
+├── CONTRIBUTING.md              # 贡献指南
+├── SOUL.md                      # Nanobot 人格定义
 │
-├── finagent/                  # 主代码 | Main source
+├── finagent/                    # 主代码
 │   ├── __init__.py
 │   │
-│   ├── adapters/                # 数据适配器 | Data adapters
-│   │   ├── base.py              # 抽象接口 | Abstract interface
+│   ├── adapters/                # 数据适配器
+│   │   ├── base.py              # 抽象接口
 │   │   ├── qmt_adapter.py       # 迅投QMT
 │   │   ├── akshare_adapter.py   # AKShare
-│   │   ├── ptrade_adapter.py    # PTrade (预留 reserved)
-│   │   └── tdx_adapter.py       # 通达信 (预留 reserved)
+│   │   ├── ptrade_adapter.py    # PTrade (预留)
+│   │   └── tdx_adapter.py       # 通达信 (预留)
 │   │
-│   ├── skills/                  # 技能模块 | Skill modules
+│   ├── skills/                  # 技能模块
 │   │   ├── logic/               # 📊 逻辑分析组
 │   │   │   ├── biz_model.py     # 商业模式分析
 │   │   │   ├── financial.py     # 财务健康度
@@ -360,25 +339,25 @@ finagent/
 │   │       ├── risk_check.py    # 风控规则
 │   │       └── trade_gateway.py # 交易网关 (预留)
 │   │
-│   ├── engine/                  # 计算引擎 | Calculation engine
+│   ├── engine/                  # 计算引擎
 │   │   ├── indicators.py        # 技术指标封装
 │   │   ├── volume_patterns.py   # 量能形态算法
 │   │   └── key_levels.py        # 支撑压力位
 │   │
-│   ├── db/                      # 数据存储 | Data storage
+│   ├── db/                      # 数据存储
 │   │   ├── models.py            # SQLite 数据模型
 │   │   └── database.py          # 数据库操作
 │   │
-│   └── templates/               # 输出模板 | Output templates
+│   └── templates/               # 输出模板
 │       ├── logic_report.md      # 逻辑分析报告模板
 │       ├── market_brief.md      # 市场简报模板
 │       └── chart_decision.md    # K线决策模板
 │
-├── config/                      # 配置文件 | Config files
+├── config/                      # 配置文件
 │   ├── config.example.json      # Nanobot 配置示例
 │   └── cron.example.json        # 定时任务示例
 │
-├── docs/                        # 文档 | Documentation
+├── docs/                        # 文档
 │   ├── architecture.md          # 架构详解
 │   ├── skill-development.md     # Skill 开发指南
 │   ├── data-adapters.md         # 数据适配器文档
@@ -386,7 +365,7 @@ finagent/
 │   ├── qmt-setup.md             # QMT 配置教程
 │   └── assets/                  # 图片资源
 │
-└── tests/                       # 测试 | Tests
+└── tests/                       # 测试
     ├── test_adapters/
     ├── test_skills/
     └── test_engine/
@@ -394,26 +373,17 @@ finagent/
 
 ---
 
-## 设计哲学 | Design Philosophy
+## 设计哲学
 
-### 逻辑闭环的五条铁律 | Five Iron Rules of Logic Closed-Loop
+### 逻辑闭环的五条铁律
 
-1. **可追溯** — 用户问"为什么推荐这个"，系统能给出 3 层以内推理  
-   **Traceable** — The system can explain any recommendation within 3 reasoning layers
+1. **可追溯** — 用户问"为什么推荐这个"，系统能给出 3 层以内推理
+2. **可证伪** — 每个结论必须附带"逻辑失效条件"
+3. **不黑盒** — 不依赖不可解释的模型，优先用公开可理解的逻辑
+4. **中线定位** — 日线为主，周线确认，不做日内噪音
+5. **风险优先** — 先问"会亏多少"，再问"能赚多少"
 
-2. **可证伪** — 每个结论必须附带"逻辑失效条件"  
-   **Falsifiable** — Every conclusion must include invalidation conditions
-
-3. **不黑盒** — 不依赖不可解释的模型，优先用公开可理解的逻辑  
-   **No black box** — Prefer explainable logic over opaque models
-
-4. **中线定位** — 日线为主，周线确认，不做日内噪音  
-   **Swing focus** — Daily chart primary, weekly confirmation, no intraday noise
-
-5. **风险优先** — 先问"会亏多少"，再问"能赚多少"  
-   **Risk first** — Ask "how much can I lose" before "how much can I gain"
-
-### 逻辑链输出模板 | Logic Chain Output Template
+### 逻辑链输出模板
 
 参考实际运行效果（节选）：
 
@@ -433,7 +403,7 @@ finagent/
     ┌────────┬──────────────────┬──────────────┐
     │ 板块    │ 逻辑              │ A股标的       │
     ├────────┼──────────────────┼──────────────┤
-    │ 算计算  │ 涨价周期开启       │ 中际旭创      │
+    │ AI算力  │ 涨价周期开启       │ 中际旭创      │
     │ AI算力  │ Token需求暴增      │ 中科电气      │
     │ 光模块  │ 数据中心互联需求    │ 中马传动      │
     └────────┴──────────────────┴──────────────┘
@@ -456,10 +426,10 @@ finagent/
 
 ---
 
-## 技术栈 | Tech Stack
+## 技术栈
 
-| 组件 Component | 选型 Choice | 说明 Note |
-|---------------|------------|----------|
+| 组件 | 选型 | 说明 |
+|------|------|------|
 | Agent 框架 | [Nanobot](https://github.com/HKUDS/nanobot) | ~4000行Python，轻量级 OpenClaw 替代 |
 | LLM | DeepSeek-V3 (主) / Qwen (备) | 中文理解强，API成本低 |
 | 行情数据 | QMT (xtquant) + AKShare | QMT实时行情，AKShare免费补充 |
@@ -471,32 +441,26 @@ finagent/
 
 ---
 
-## 路线图 | Roadmap
+## 路线图
 
-| 阶段 Phase | 目标 Goal | 周期 Duration |
-|-----------|----------|--------------|
+| 阶段 | 目标 | 周期 |
+|------|------|------|
 | **M0** | 🔧 环境搭建：Nanobot + 飞书 + AKShare 跑通 | 1 周 |
-| | Setup: Nanobot + Feishu + AKShare integration | |
 | **M1** | 📈 K线决策组上线（最易验证的模块） | 1 周 |
-| | Chart Decision skills (easiest to validate) | |
 | **M2** | 📊 逻辑分析组上线（核心差异化能力） | 2 周 |
-| | Logic Analysis skills (core differentiator) | |
 | **M3** | 📡 市场雷达组上线 + Cron推送 | 2 周 |
-| | Market Radar skills + Cron auto-push | |
 | **M4** | ⚡ 执行风控组 + 预警 + 交易模拟 | 1 周 |
-| | Execution & Risk + Alerts + Trade simulation | |
 | **M5** | 🧪 集成测试 + 文档 + 开源发布 | 1 周 |
-| | Integration test + Docs + Open-source release | |
 
-**总计约 8 周到达可用 MVP | ~8 weeks to usable MVP**
+**总计约 8 周到达可用 MVP**
 
 ---
 
-## 贡献指南 | Contributing
+## 贡献指南
 
-我们欢迎所有形式的贡献！| We welcome all forms of contribution!
+我们欢迎所有形式的贡献！
 
-### 如何贡献一个新 Skill | How to Contribute a Skill
+### 如何贡献一个新 Skill
 
 1. Fork 本仓库
 2. 在 `finagent/skills/` 对应目录下创建新文件
@@ -505,27 +469,26 @@ finagent/
 5. 提交 Pull Request
 
 ```python
-# Skill 模板 | Skill Template
+# Skill 模板
 from nanobot.agent.tools import tool
 
 @tool
 async def skill_example(symbol: str) -> str:
     """
-    Skill 描述 | Skill description
-    
+    Skill 描述
+
     Args:
-        symbol: 股票代码 | Stock symbol (e.g., "600519")
+        symbol: 股票代码 (e.g., "600519")
     Returns:
-        分析结果 | Analysis result
+        分析结果
     """
-    # 1. 获取数据 | Fetch data
-    # 2. 计算/推理 | Calculate/Reason
+    # 1. 获取数据
+    # 2. 计算/推理
     # 3. 返回结果（必须包含 rationale + invalidation）
-    #    Return (must include rationale + invalidation)
     return result
 ```
 
-### 贡献方向 | Contribution Areas
+### 贡献方向
 
 - 🔌 **数据适配器** — PTrade / 通达信 / 美股 / 港股 / 加密货币
 - 🧠 **分析 Skills** — 更多分析维度（行业对比、股东变动等）
@@ -536,11 +499,9 @@ async def skill_example(symbol: str) -> str:
 
 ---
 
-## 风险声明 | Disclaimer
+## 风险声明
 
 > ⚠️ **FinAgent 仅供学习和研究使用，不构成任何投资建议。**
->
-> ⚠️ **FinAgent is for educational and research purposes only. It does NOT constitute investment advice.**
 
 - AI 分析存在"幻觉"风险，所有结论需人工验证
 - 历史回测表现不代表未来收益
@@ -548,15 +509,9 @@ async def skill_example(symbol: str) -> str:
 - 用户应始终对自己的投资决策负完全责任
 - 股市有风险，入市需谨慎
 
-- AI analysis carries "hallucination" risks; all conclusions require human verification
-- Past backtest performance does not guarantee future returns
-- Automated trading carries technical failure risks
-- Users are fully responsible for their own investment decisions
-- Investing involves risk; trade with caution
-
 ---
 
-## 致谢 | Acknowledgments
+## 致谢
 
 - [Nanobot](https://github.com/HKUDS/nanobot) — 香港大学 HKUDS 实验室的轻量级 AI Agent 框架
 - [OpenClaw](https://github.com/openclaw) — Skill 模块化设计思想的灵感来源
@@ -566,12 +521,12 @@ async def skill_example(symbol: str) -> str:
 
 ---
 
-## 开源协议 | License
+## 开源协议
 
 [MIT License](LICENSE) — 自由使用、修改和分发。
 
 ---
 
 <p align="center">
-  <strong>如果觉得有用，请给个 ⭐ Star！| If useful, give us a ⭐ Star!</strong>
+  <strong>如果觉得有用，请给个 ⭐ Star！</strong>
 </p>
