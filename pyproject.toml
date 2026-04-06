@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta:build"
+
+[project]
+name = "finagent"
+version = "0.1.0"
+description = "基于逻辑闭环的 A 股智能投研助理 | Logic-Closed-Loop A-Share Investment Research Assistant"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+    "nanobot-ai",
+    "akshare",
+    "pandas",
+    "pandas_ta",
+    "TA-Lib",
+    "httpx",
+    "sqlalchemy",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff", "mypy"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
